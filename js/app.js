@@ -61,6 +61,8 @@ function init(gl) {
   gl.vertexAttribPointer(program.attributes.position, 3, gl.FLOAT, false, 0, 0);
 
   gl.enable(gl.DEPTH_TEST);
+
+  console.log(gl.drawingBufferWidth, gl.drawingBufferHeight);
 }
 
 function draw(gl, t, volume) {
