@@ -16,7 +16,6 @@
       attribute vec3 position;
 
       uniform mat3 transform;
-      uniform mat4 scale;
 
       void main(void) {
         gl_Position = vec4(transform * position, 1.0);

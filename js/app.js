@@ -7,9 +7,8 @@ module.exports = {
 
 var program;
 var buffer;
-var elementBuffer;
 
-var vertices = [
+var uniqueVertices = [
   -1, -1, -1,
   -1, -1, 1,
   -1, 1, -1,
@@ -37,6 +36,15 @@ var elements = [
   3, 7
 ];
 
+var originalVertices = elements.reduce(function(acc, index) {
+  acc.push(uniqueVertices[index * 3]);
+  acc.push(uniqueVertices[index * 3 + 1]);
+  acc.push(uniqueVertices[index * 3 + 2]);
+  return acc;
+}, []);
+
+var vertices = new Float32Array(originalVertices);
+
 function init(gl) {
   // Create shaders and program.
   var vertSrc = getScript('shader-vert');
@@ -46,19 +54,16 @@ function init(gl) {
   program = createProgram(gl, vertSrc, fragSrc, uniformNames, attributeNames);
 
   // Create buffer.
-  buffer = createBuffer(gl, vertices);
+  buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
   gl.enableVertexAttribArray(program.attributes.position);
   gl.vertexAttribPointer(program.attributes.position, 3, gl.FLOAT, false, 0, 0);
-
-  // Create element buffer.
-  elementBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, elementBuffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(elements), gl.STATIC_DRAW);
 
   gl.enable(gl.DEPTH_TEST);
 }
 
-function draw(gl, t) {
+function draw(gl, t, volume) {
   var w = gl.drawingBufferWidth;
   var h = gl.drawingBufferHeight;
   gl.viewport(0, 0, w, h);
@@ -72,19 +77,16 @@ function draw(gl, t) {
   var transform = multiply(multiply(rotateX(theta), rotateY(theta)), scale(0.3));
   gl.uniformMatrix3fv(program.uniforms.transform, false, transform);
 
-  gl.drawElements(gl.LINES, elements.length, gl.UNSIGNED_SHORT, 0);
+  for (var i = 0; i < 5; i++) {
+    randomVertices(volume * 0.03);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    gl.drawArrays(gl.LINES, 0, elements.length);
+  }
 }
 
 function getScript(id) {
   var script = document.getElementById(id);
   return script.innerText;
-}
-
-function createBuffer(gl, data) {
-  var buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
-  return buffer;
 }
 
 function rotateX(radian) {
@@ -132,4 +134,10 @@ function scale(num) {
     0, num, 0,
     0, 0, num
   ];
+}
+
+function randomVertices(amplitude) {
+  for (var i = 0; i < vertices.length; i++) {
+    vertices[i] = originalVertices[i] + amplitude * (Math.random() - 0.5);
+  }
 }
