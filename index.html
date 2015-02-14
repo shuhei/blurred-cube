@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <script id="shader-frag" type="x-shader/x-fragment">
+      precision mediump float;
+
+      void main(void) {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      }
+    </script>
+    <script id="shader-vert" type="x-shader/x-vertex">
+      precision mediump float;
+
+      attribute vec3 position;
+
+      uniform mat3 transform;
+      uniform mat4 scale;
+
+      void main(void) {
+        gl_Position = vec4(transform * position, 1.0);
+      }
+    </script>
+    <script src="bundle.js"></script>
+  </body>
+</html>
