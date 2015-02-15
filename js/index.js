@@ -1,5 +1,3 @@
-require('../css/index.css');
-
 var app = require('./app');
 var fit = require('./fit');
 var microphone = require('./microphone');

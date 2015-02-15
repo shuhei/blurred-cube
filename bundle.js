@@ -44,8 +44,6 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(4);
-
 	var app = __webpack_require__(1);
 	var fit = __webpack_require__(2);
 	var microphone = __webpack_require__(3);
@@ -71,10 +69,10 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var mat = __webpack_require__(9);
+	var mat = __webpack_require__(6);
 
-	var createProgram = __webpack_require__(8);
-	var originalVertices = __webpack_require__(33);
+	var createProgram = __webpack_require__(4);
+	var originalVertices = __webpack_require__(5);
 
 	module.exports = {
 	  init: init,
@@ -223,253 +221,6 @@
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// style-loader: Adds some css to the DOM by adding a <style> tag
-
-	// load the styles
-	var content = __webpack_require__(5);
-	if(typeof content === 'string') content = [[module.id, content, '']];
-	// add the styles to the DOM
-	var update = __webpack_require__(6)(content, {});
-	// Hot Module Replacement
-	if(false) {
-		// When the styles change, update the <style> tags
-		module.hot.accept("!!/Users/shuhei/work/js/blurred-box/node_modules/css-loader/index.js!/Users/shuhei/work/js/blurred-box/css/index.css", function() {
-			var newContent = require("!!/Users/shuhei/work/js/blurred-box/node_modules/css-loader/index.js!/Users/shuhei/work/js/blurred-box/css/index.css");
-			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-			update(newContent);
-		});
-		// When the module is disposed, remove the <style> tags
-		module.hot.dispose(function() { update(); });
-	}
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports = module.exports = __webpack_require__(7)();
-	exports.push([module.id, "body {\n  padding: 0;\n  margin: 0;\n\n  font-family: sans-serif;\n}\n\n#header {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  padding: 1em;\n}\n\n#footer {\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  left: 0;\n  text-align: right;\n  z-index: 1000;\n  padding: 1em;\n}\n\na {\n  color: #999;\n  text-decoration: none;\n}\n\na:hover {\n  color: #000;\n  text-decoration: underline;\n}\n", ""]);
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*
-		MIT License http://www.opensource.org/licenses/mit-license.php
-		Author Tobias Koppers @sokra
-	*/
-	var stylesInDom = {},
-		memoize = function(fn) {
-			var memo;
-			return function () {
-				if (typeof memo === "undefined") memo = fn.apply(this, arguments);
-				return memo;
-			};
-		},
-		isIE9 = memoize(function() {
-			return /msie 9\b/.test(window.navigator.userAgent.toLowerCase());
-		}),
-		getHeadElement = memoize(function () {
-			return document.head || document.getElementsByTagName("head")[0];
-		}),
-		singletonElement = null,
-		singletonCounter = 0;
-
-	module.exports = function(list, options) {
-		if(false) {
-			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
-		}
-
-		options = options || {};
-		// Force single-tag solution on IE9, which has a hard limit on the # of <style>
-		// tags it will allow on a page
-		if (typeof options.singleton === "undefined") options.singleton = isIE9();
-
-		var styles = listToStyles(list);
-		addStylesToDom(styles, options);
-
-		return function update(newList) {
-			var mayRemove = [];
-			for(var i = 0; i < styles.length; i++) {
-				var item = styles[i];
-				var domStyle = stylesInDom[item.id];
-				domStyle.refs--;
-				mayRemove.push(domStyle);
-			}
-			if(newList) {
-				var newStyles = listToStyles(newList);
-				addStylesToDom(newStyles, options);
-			}
-			for(var i = 0; i < mayRemove.length; i++) {
-				var domStyle = mayRemove[i];
-				if(domStyle.refs === 0) {
-					for(var j = 0; j < domStyle.parts.length; j++)
-						domStyle.parts[j]();
-					delete stylesInDom[domStyle.id];
-				}
-			}
-		};
-	}
-
-	function addStylesToDom(styles, options) {
-		for(var i = 0; i < styles.length; i++) {
-			var item = styles[i];
-			var domStyle = stylesInDom[item.id];
-			if(domStyle) {
-				domStyle.refs++;
-				for(var j = 0; j < domStyle.parts.length; j++) {
-					domStyle.parts[j](item.parts[j]);
-				}
-				for(; j < item.parts.length; j++) {
-					domStyle.parts.push(addStyle(item.parts[j], options));
-				}
-			} else {
-				var parts = [];
-				for(var j = 0; j < item.parts.length; j++) {
-					parts.push(addStyle(item.parts[j], options));
-				}
-				stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
-			}
-		}
-	}
-
-	function listToStyles(list) {
-		var styles = [];
-		var newStyles = {};
-		for(var i = 0; i < list.length; i++) {
-			var item = list[i];
-			var id = item[0];
-			var css = item[1];
-			var media = item[2];
-			var sourceMap = item[3];
-			var part = {css: css, media: media, sourceMap: sourceMap};
-			if(!newStyles[id])
-				styles.push(newStyles[id] = {id: id, parts: [part]});
-			else
-				newStyles[id].parts.push(part);
-		}
-		return styles;
-	}
-
-	function createStyleElement() {
-		var styleElement = document.createElement("style");
-		var head = getHeadElement();
-		styleElement.type = "text/css";
-		head.appendChild(styleElement);
-		return styleElement;
-	}
-
-	function addStyle(obj, options) {
-		var styleElement, update, remove;
-
-		if (options.singleton) {
-			var styleIndex = singletonCounter++;
-			styleElement = singletonElement || (singletonElement = createStyleElement());
-			update = applyToSingletonTag.bind(null, styleElement, styleIndex, false);
-			remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true);
-		} else {
-			styleElement = createStyleElement();
-			update = applyToTag.bind(null, styleElement);
-			remove = function () {
-				styleElement.parentNode.removeChild(styleElement);
-			};
-		}
-
-		update(obj);
-
-		return function updateStyle(newObj) {
-			if(newObj) {
-				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
-					return;
-				update(obj = newObj);
-			} else {
-				remove();
-			}
-		};
-	}
-
-	function replaceText(source, id, replacement) {
-		var boundaries = ["/** >>" + id + " **/", "/** " + id + "<< **/"];
-		var start = source.lastIndexOf(boundaries[0]);
-		var wrappedReplacement = replacement
-			? (boundaries[0] + replacement + boundaries[1])
-			: "";
-		if (source.lastIndexOf(boundaries[0]) >= 0) {
-			var end = source.lastIndexOf(boundaries[1]) + boundaries[1].length;
-			return source.slice(0, start) + wrappedReplacement + source.slice(end);
-		} else {
-			return source + wrappedReplacement;
-		}
-	}
-
-	function applyToSingletonTag(styleElement, index, remove, obj) {
-		var css = remove ? "" : obj.css;
-
-		if(styleElement.styleSheet) {
-			styleElement.styleSheet.cssText = replaceText(styleElement.styleSheet.cssText, index, css);
-		} else {
-			var cssNode = document.createTextNode(css);
-			var childNodes = styleElement.childNodes;
-			if (childNodes[index]) styleElement.removeChild(childNodes[index]);
-			if (childNodes.length) {
-				styleElement.insertBefore(cssNode, childNodes[index]);
-			} else {
-				styleElement.appendChild(cssNode);
-			}
-		}
-	}
-
-	function applyToTag(styleElement, obj) {
-		var css = obj.css;
-		var media = obj.media;
-		var sourceMap = obj.sourceMap;
-
-		if(sourceMap && typeof btoa === "function") {
-			try {
-				css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(JSON.stringify(sourceMap)) + " */";
-				css = "@import url(\"data:text/css;base64," + btoa(css) + "\")";
-			} catch(e) {}
-		}
-
-		if(media) {
-			styleElement.setAttribute("media", media)
-		}
-
-		if(styleElement.styleSheet) {
-			styleElement.styleSheet.cssText = css;
-		} else {
-			while(styleElement.firstChild) {
-				styleElement.removeChild(styleElement.firstChild);
-			}
-			styleElement.appendChild(document.createTextNode(css));
-		}
-	}
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = function() {
-		var list = [];
-		list.toString = function toString() {
-			var result = [];
-			for(var i = 0; i < this.length; i++) {
-				var item = this[i];
-				if(item[2]) {
-					result.push("@media " + item[2] + "{" + item[1] + "}");
-				} else {
-					result.push(item[1]);
-				}
-			}
-			return result.join("");
-		};
-		return list;
-	}
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
 	module.exports = createProgram;
 
 	function createProgram(gl, vertSrc, fragSrc, uniformNames, attributeNames) {
@@ -518,37 +269,78 @@
 
 
 /***/ },
-/* 9 */
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var uniqueVertices = [
+	  -1, -1, -1,
+	  -1, -1, 1,
+	  -1, 1, -1,
+	  -1, 1, 1,
+	  1, -1, -1,
+	  1, -1, 1,
+	  1, 1, -1,
+	  1, 1, 1
+	];
+
+	var elements = [
+	  0, 1,
+	  1, 3,
+	  3, 2,
+	  2, 0,
+
+	  4, 5,
+	  5, 7,
+	  7, 6,
+	  6, 4,
+
+	  0, 4,
+	  1, 5,
+	  2, 6,
+	  3, 7
+	];
+
+	// Destruct elements into vertices.
+	module.exports = elements.reduce(function(acc, index) {
+	  acc.push(uniqueVertices[index * 3]);
+	  acc.push(uniqueVertices[index * 3 + 1]);
+	  acc.push(uniqueVertices[index * 3 + 2]);
+	  return acc;
+	}, []);
+
+
+/***/ },
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  create: __webpack_require__(10)
-	  , clone: __webpack_require__(11)
-	  , copy: __webpack_require__(12)
-	  , identity: __webpack_require__(13)
-	  , transpose: __webpack_require__(14)
-	  , invert: __webpack_require__(15)
-	  , adjoint: __webpack_require__(16)
-	  , determinant: __webpack_require__(17)
-	  , multiply: __webpack_require__(18)
-	  , translate: __webpack_require__(19)
-	  , scale: __webpack_require__(20)
-	  , rotate: __webpack_require__(21)
-	  , rotateX: __webpack_require__(22)
-	  , rotateY: __webpack_require__(23)
-	  , rotateZ: __webpack_require__(24)
-	  , fromRotationTranslation: __webpack_require__(25)
-	  , fromQuat: __webpack_require__(26)
-	  , frustum: __webpack_require__(27)
-	  , perspective: __webpack_require__(28)
-	  , perspectiveFromFieldOfView: __webpack_require__(29)
-	  , ortho: __webpack_require__(30)
-	  , lookAt: __webpack_require__(31)
-	  , str: __webpack_require__(32)
+	  create: __webpack_require__(7)
+	  , clone: __webpack_require__(8)
+	  , copy: __webpack_require__(9)
+	  , identity: __webpack_require__(10)
+	  , transpose: __webpack_require__(11)
+	  , invert: __webpack_require__(12)
+	  , adjoint: __webpack_require__(13)
+	  , determinant: __webpack_require__(14)
+	  , multiply: __webpack_require__(15)
+	  , translate: __webpack_require__(16)
+	  , scale: __webpack_require__(17)
+	  , rotate: __webpack_require__(18)
+	  , rotateX: __webpack_require__(19)
+	  , rotateY: __webpack_require__(20)
+	  , rotateZ: __webpack_require__(21)
+	  , fromRotationTranslation: __webpack_require__(22)
+	  , fromQuat: __webpack_require__(23)
+	  , frustum: __webpack_require__(24)
+	  , perspective: __webpack_require__(25)
+	  , perspectiveFromFieldOfView: __webpack_require__(26)
+	  , ortho: __webpack_require__(27)
+	  , lookAt: __webpack_require__(28)
+	  , str: __webpack_require__(29)
 	}
 
 /***/ },
-/* 10 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = create;
@@ -580,7 +372,7 @@
 	};
 
 /***/ },
-/* 11 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = clone;
@@ -613,7 +405,7 @@
 	};
 
 /***/ },
-/* 12 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = copy;
@@ -646,7 +438,7 @@
 	};
 
 /***/ },
-/* 13 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = identity;
@@ -678,7 +470,7 @@
 	};
 
 /***/ },
-/* 14 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = transpose;
@@ -732,7 +524,7 @@
 	};
 
 /***/ },
-/* 15 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = invert;
@@ -792,7 +584,7 @@
 	};
 
 /***/ },
-/* 16 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = adjoint;
@@ -830,7 +622,7 @@
 	};
 
 /***/ },
-/* 17 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = determinant;
@@ -865,7 +657,7 @@
 	};
 
 /***/ },
-/* 18 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = multiply;
@@ -912,7 +704,7 @@
 	};
 
 /***/ },
-/* 19 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = translate;
@@ -955,7 +747,7 @@
 	};
 
 /***/ },
-/* 20 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = scale;
@@ -991,7 +783,7 @@
 	};
 
 /***/ },
-/* 21 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = rotate;
@@ -1060,7 +852,7 @@
 	};
 
 /***/ },
-/* 22 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = rotateX;
@@ -1109,7 +901,7 @@
 	};
 
 /***/ },
-/* 23 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = rotateY;
@@ -1158,7 +950,7 @@
 	};
 
 /***/ },
-/* 24 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = rotateZ;
@@ -1207,7 +999,7 @@
 	};
 
 /***/ },
-/* 25 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = fromRotationTranslation;
@@ -1265,7 +1057,7 @@
 	};
 
 /***/ },
-/* 26 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = fromQuat;
@@ -1317,7 +1109,7 @@
 	};
 
 /***/ },
-/* 27 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = frustum;
@@ -1358,7 +1150,7 @@
 	};
 
 /***/ },
-/* 28 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = perspective;
@@ -1396,7 +1188,7 @@
 	};
 
 /***/ },
-/* 29 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = perspectiveFromFieldOfView;
@@ -1442,7 +1234,7 @@
 
 
 /***/ },
-/* 30 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = ortho;
@@ -1483,10 +1275,10 @@
 	};
 
 /***/ },
-/* 31 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var identity = __webpack_require__(13);
+	var identity = __webpack_require__(10);
 
 	module.exports = lookAt;
 
@@ -1578,7 +1370,7 @@
 	};
 
 /***/ },
-/* 32 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = str;
@@ -1595,47 +1387,6 @@
 	                    a[8] + ', ' + a[9] + ', ' + a[10] + ', ' + a[11] + ', ' + 
 	                    a[12] + ', ' + a[13] + ', ' + a[14] + ', ' + a[15] + ')';
 	};
-
-/***/ },
-/* 33 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var uniqueVertices = [
-	  -1, -1, -1,
-	  -1, -1, 1,
-	  -1, 1, -1,
-	  -1, 1, 1,
-	  1, -1, -1,
-	  1, -1, 1,
-	  1, 1, -1,
-	  1, 1, 1
-	];
-
-	var elements = [
-	  0, 1,
-	  1, 3,
-	  3, 2,
-	  2, 0,
-
-	  4, 5,
-	  5, 7,
-	  7, 6,
-	  6, 4,
-
-	  0, 4,
-	  1, 5,
-	  2, 6,
-	  3, 7
-	];
-
-	// Destruct elements into vertices.
-	module.exports = elements.reduce(function(acc, index) {
-	  acc.push(uniqueVertices[index * 3]);
-	  acc.push(uniqueVertices[index * 3 + 1]);
-	  acc.push(uniqueVertices[index * 3 + 2]);
-	  return acc;
-	}, []);
-
 
 /***/ }
 /******/ ])

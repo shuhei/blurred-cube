@@ -7,10 +7,7 @@
     "gl-mat4": "^1.1.2"
   },
   "devDependencies": {
-    "css-loader": "^0.9.1",
-    "style-loader": "^0.8.3",
-    "webpack": "^1.5.3",
-    "webpack-dev-server": "^1.7.0"
+    "webpack": "^1.5.3"
   },
   "scripts": {
     "start": "webpack --watch --progress --colors",
