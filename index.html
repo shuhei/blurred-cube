@@ -15,10 +15,10 @@
 
       attribute vec3 position;
 
-      uniform mat3 transform;
+      uniform mat4 mvp;
 
       void main(void) {
-        gl_Position = vec4(transform * position, 1.0);
+        gl_Position = mvp * vec4(position, 1.0);
       }
     </script>
     <script src="bundle.js"></script>

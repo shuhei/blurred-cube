@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
+    "gl-mat4": "^1.1.2"
   },
   "devDependencies": {
     "css-loader": "^0.9.1",
