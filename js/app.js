@@ -9,8 +9,8 @@ module.exports = {
 };
 
 var ROTATION_TIME = 5000;
-var EYE = [0, 0, -10];
-var VIEW_TRANSLATE = [0, 0, -7];
+var VIEW_TRANSLATE = [0, 0, -6];
+var NUMBER_OF_LINES = 10;
 
 var vertices = new Float32Array(originalVertices);
 
@@ -30,7 +30,6 @@ function init(gl) {
   // Create buffer.
   buffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
   gl.enableVertexAttribArray(program.attributes.position);
   gl.vertexAttribPointer(program.attributes.position, 3, gl.FLOAT, false, 0, 0);
 
@@ -61,10 +60,12 @@ function draw(gl, t, volume) {
 
   gl.uniformMatrix4fv(program.uniforms.mvp, false, mvp);
 
-  // Draw cube lines 5 times.
-  for (var i = 0; i < 5; i++) {
+  // Draw cube lines multiple times.
+  for (var i = 0; i < NUMBER_OF_LINES; i++) {
     randomVertices(volume * 0.03);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    // Rewrite buffer data multiple times a frame!!!
+    // Any better way to move things around?
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STREAM_DRAW);
     gl.drawArrays(gl.LINES, 0, vertices.length / 3);
   }
 }

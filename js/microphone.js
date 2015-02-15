@@ -1,3 +1,5 @@
+var SMOOTHING_RATIO = 0.7;
+
 module.exports = function() {
   var analyser;
   navigator.webkitGetUserMedia({ audio: true }, function(stream) {
@@ -10,13 +12,17 @@ module.exports = function() {
     console.error('Failed to get user media', e);
   });
 
+  var smoothed = 0;
+
   return function() {
     if (!analyser) {
       return null;
     }
     var fft = new Float32Array(analyser.frequencyBinCount);
     analyser.getFloatFrequencyData(fft);
-    return getAverageVolume(fft);
+    smoothed = smoothed * SMOOTHING_RATIO +
+      getAverageVolume(fft) * (1.0 - SMOOTHING_RATIO);
+    return smoothed;
   };
 };
 
