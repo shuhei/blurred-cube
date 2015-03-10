@@ -1,5 +1,5 @@
 {
-  "name": "blurred-box",
+  "name": "blurred-cube",
   "version": "1.0.0",
   "description": "An experiment of WebGL and User Media",
   "main": "app.js",
@@ -7,12 +7,18 @@
     "gl-mat4": "^1.1.2"
   },
   "devDependencies": {
+    "gh-pagesify": "^0.2.1",
     "webpack": "^1.5.3"
   },
   "scripts": {
     "start": "webpack --watch --progress --colors",
+    "build": "rm -rf public && mkdir public && webpack && cp ./{index.html,index.css,bundle.js} public/",
+    "deploy": "npm run build && gh-pagesify",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Shuhei Kagawa <shuhei.kagawa@gmail.com>",
-  "license": "BSD"
+  "license": "BSD",
+  "gh-pages": {
+    "repository": "shuhei/blurred-cube"
+  }
 }
