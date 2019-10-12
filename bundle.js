@@ -1,52 +1,52 @@
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-/******/
+
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-/******/
+
 /******/ 		// Check if module is in cache
 /******/ 		if(installedModules[moduleId])
 /******/ 			return installedModules[moduleId].exports;
-/******/
+
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
 /******/ 			loaded: false
 /******/ 		};
-/******/
+
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
+
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-/******/
+
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/
-/******/
+
+
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-/******/
+
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-/******/
+
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-/******/
+
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var app = __webpack_require__(1);
-	var fit = __webpack_require__(2);
-	var microphone = __webpack_require__(3);
+	var fit = __webpack_require__(34);
+	var microphone = __webpack_require__(35);
 
 	var canvas = document.createElement('canvas');
 	document.body.appendChild(canvas);
@@ -65,14 +65,14 @@
 	}
 
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-	var mat = __webpack_require__(6);
+	var mat = __webpack_require__(2);
 
-	var createProgram = __webpack_require__(4);
-	var originalVertices = __webpack_require__(5);
+	var createProgram = __webpack_require__(32);
+	var originalVertices = __webpack_require__(33);
 
 	module.exports = {
 	  init: init,
@@ -153,195 +153,46 @@
 	}
 
 
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = function(canvas) {
-	  window.addEventListener('resize', resize);
-	  resize();
-
-	  function resize() {
-	    canvas.width = window.innerWidth;
-	    canvas.height = window.innerHeight;
-	  }
-	};
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var SMOOTHING_RATIO = 0.7;
-
-	module.exports = function() {
-	  var analyser;
-	  navigator.webkitGetUserMedia({ audio: true }, function(stream) {
-	    console.log('Got user media');
-	    var context = new AudioContext();
-	    analyser = context.createAnalyser();
-	    var microphone = context.createMediaStreamSource(stream);
-	    microphone.connect(analyser);
-	  }, function(e) {
-	    console.error('Failed to get user media', e);
-	  });
-
-	  var smoothed = 0;
-
-	  return function() {
-	    if (!analyser) {
-	      return null;
-	    }
-	    var fft = new Float32Array(analyser.frequencyBinCount);
-	    analyser.getFloatFrequencyData(fft);
-	    smoothed = smoothed * SMOOTHING_RATIO +
-	      getAverageVolume(fft) * (1.0 - SMOOTHING_RATIO);
-	    return smoothed;
-	  };
-	};
-
-	function getAverageVolume(fft) {
-	  var volume = 140 + average(fft);
-	  if (volume < 0) {
-	    return 0;
-	  }
-	  return volume;
-	}
-
-	function average(array) {
-	  var total = 0;
-	  for (var i = 0; i < array.length; i++) {
-	    total += array[i];
-	  }
-	  return total / array.length;
-	}
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = createProgram;
-
-	function createProgram(gl, vertSrc, fragSrc, uniformNames, attributeNames) {
-	  var vert = compileShader(gl, gl.VERTEX_SHADER, vertSrc);
-	  var frag = compileShader(gl, gl.FRAGMENT_SHADER, fragSrc);
-
-	  var program = gl.createProgram();
-	  gl.attachShader(program, vert);
-	  gl.attachShader(program, frag);
-
-	  var attributes = {};
-	  attributeNames.forEach(function(name, location) {
-	    gl.bindAttribLocation(program, location, name);
-	    console.log('attribute location', name, location);
-	    attributes[name] = location;
-	  });
-
-	  gl.linkProgram(program);
-	  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-	    throw new Error('Error linking program: ' + gl.getProgramInfoLog(program));
-	  }
-
-	  var uniforms = {};
-	  uniformNames.forEach(function(name) {
-	    var location = gl.getUniformLocation(program, name);
-	    console.log('uniform location', name, location);
-	    uniforms[name] = location;
-	  });
-
-	  return {
-	    program: program,
-	    uniforms: uniforms,
-	    attributes: attributes
-	  };
-	}
-
-	function compileShader(gl, type, src) {
-	  var shader = gl.createShader(type);
-	  gl.shaderSource(shader, src);
-	  gl.compileShader(shader);
-	  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-	    throw new Error('Error compiling shader: ' + gl.getShaderInfoLog(shader));
-	  }
-	  return shader;
-	}
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var uniqueVertices = [
-	  -1, -1, -1,
-	  -1, -1, 1,
-	  -1, 1, -1,
-	  -1, 1, 1,
-	  1, -1, -1,
-	  1, -1, 1,
-	  1, 1, -1,
-	  1, 1, 1
-	];
-
-	var elements = [
-	  0, 1,
-	  1, 3,
-	  3, 2,
-	  2, 0,
-
-	  4, 5,
-	  5, 7,
-	  7, 6,
-	  6, 4,
-
-	  0, 4,
-	  1, 5,
-	  2, 6,
-	  3, 7
-	];
-
-	// Destruct elements into vertices.
-	module.exports = elements.reduce(function(acc, index) {
-	  acc.push(uniqueVertices[index * 3]);
-	  acc.push(uniqueVertices[index * 3 + 1]);
-	  acc.push(uniqueVertices[index * 3 + 2]);
-	  return acc;
-	}, []);
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	module.exports = {
-	  create: __webpack_require__(7)
-	  , clone: __webpack_require__(8)
-	  , copy: __webpack_require__(9)
-	  , identity: __webpack_require__(10)
-	  , transpose: __webpack_require__(11)
-	  , invert: __webpack_require__(12)
-	  , adjoint: __webpack_require__(13)
-	  , determinant: __webpack_require__(14)
-	  , multiply: __webpack_require__(15)
-	  , translate: __webpack_require__(16)
-	  , scale: __webpack_require__(17)
-	  , rotate: __webpack_require__(18)
-	  , rotateX: __webpack_require__(19)
-	  , rotateY: __webpack_require__(20)
-	  , rotateZ: __webpack_require__(21)
-	  , fromRotationTranslation: __webpack_require__(22)
-	  , fromQuat: __webpack_require__(23)
-	  , frustum: __webpack_require__(24)
-	  , perspective: __webpack_require__(25)
-	  , perspectiveFromFieldOfView: __webpack_require__(26)
-	  , ortho: __webpack_require__(27)
-	  , lookAt: __webpack_require__(28)
-	  , str: __webpack_require__(29)
+	  create: __webpack_require__(3)
+	  , clone: __webpack_require__(4)
+	  , copy: __webpack_require__(5)
+	  , identity: __webpack_require__(6)
+	  , transpose: __webpack_require__(7)
+	  , invert: __webpack_require__(8)
+	  , adjoint: __webpack_require__(9)
+	  , determinant: __webpack_require__(10)
+	  , multiply: __webpack_require__(11)
+	  , translate: __webpack_require__(12)
+	  , scale: __webpack_require__(13)
+	  , rotate: __webpack_require__(14)
+	  , rotateX: __webpack_require__(15)
+	  , rotateY: __webpack_require__(16)
+	  , rotateZ: __webpack_require__(17)
+	  , fromRotation: __webpack_require__(18)
+	  , fromRotationTranslation: __webpack_require__(19)
+	  , fromScaling: __webpack_require__(20)
+	  , fromTranslation: __webpack_require__(21)
+	  , fromXRotation: __webpack_require__(22)
+	  , fromYRotation: __webpack_require__(23)
+	  , fromZRotation: __webpack_require__(24)
+	  , fromQuat: __webpack_require__(25)
+	  , frustum: __webpack_require__(26)
+	  , perspective: __webpack_require__(27)
+	  , perspectiveFromFieldOfView: __webpack_require__(28)
+	  , ortho: __webpack_require__(29)
+	  , lookAt: __webpack_require__(30)
+	  , str: __webpack_require__(31)
 	}
 
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
 
 	module.exports = create;
 
@@ -371,9 +222,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
 
 	module.exports = clone;
 
@@ -404,9 +255,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
 
 	module.exports = copy;
 
@@ -437,9 +288,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
 
 	module.exports = identity;
 
@@ -469,9 +320,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
 
 	module.exports = transpose;
 
@@ -523,9 +374,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 8 */
+/***/ (function(module, exports) {
 
 	module.exports = invert;
 
@@ -583,9 +434,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 9 */
+/***/ (function(module, exports) {
 
 	module.exports = adjoint;
 
@@ -621,9 +472,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 10 */
+/***/ (function(module, exports) {
 
 	module.exports = determinant;
 
@@ -656,9 +507,9 @@
 	    return b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 	};
 
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 11 */
+/***/ (function(module, exports) {
 
 	module.exports = multiply;
 
@@ -703,9 +554,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
 
 	module.exports = translate;
 
@@ -746,9 +597,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 13 */
+/***/ (function(module, exports) {
 
 	module.exports = scale;
 
@@ -782,9 +633,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 14 */
+/***/ (function(module, exports) {
 
 	module.exports = rotate;
 
@@ -851,9 +702,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 15 */
+/***/ (function(module, exports) {
 
 	module.exports = rotateX;
 
@@ -900,9 +751,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 16 */
+/***/ (function(module, exports) {
 
 	module.exports = rotateY;
 
@@ -949,9 +800,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 17 */
+/***/ (function(module, exports) {
 
 	module.exports = rotateZ;
 
@@ -998,9 +849,68 @@
 	    return out;
 	};
 
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 18 */
+/***/ (function(module, exports) {
+
+	module.exports = fromRotation
+
+	/**
+	 * Creates a matrix from a given angle around a given axis
+	 * This is equivalent to (but much faster than):
+	 *
+	 *     mat4.identity(dest)
+	 *     mat4.rotate(dest, dest, rad, axis)
+	 *
+	 * @param {mat4} out mat4 receiving operation result
+	 * @param {Number} rad the angle to rotate the matrix by
+	 * @param {vec3} axis the axis to rotate around
+	 * @returns {mat4} out
+	 */
+	function fromRotation(out, rad, axis) {
+	  var s, c, t
+	  var x = axis[0]
+	  var y = axis[1]
+	  var z = axis[2]
+	  var len = Math.sqrt(x * x + y * y + z * z)
+
+	  if (Math.abs(len) < 0.000001) {
+	    return null
+	  }
+
+	  len = 1 / len
+	  x *= len
+	  y *= len
+	  z *= len
+
+	  s = Math.sin(rad)
+	  c = Math.cos(rad)
+	  t = 1 - c
+
+	  // Perform rotation-specific matrix multiplication
+	  out[0] = x * x * t + c
+	  out[1] = y * x * t + z * s
+	  out[2] = z * x * t - y * s
+	  out[3] = 0
+	  out[4] = x * y * t - z * s
+	  out[5] = y * y * t + c
+	  out[6] = z * y * t + x * s
+	  out[7] = 0
+	  out[8] = x * z * t + y * s
+	  out[9] = y * z * t - x * s
+	  out[10] = z * z * t + c
+	  out[11] = 0
+	  out[12] = 0
+	  out[13] = 0
+	  out[14] = 0
+	  out[15] = 1
+	  return out
+	}
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports) {
 
 	module.exports = fromRotationTranslation;
 
@@ -1056,9 +966,208 @@
 	    return out;
 	};
 
-/***/ },
+/***/ }),
+/* 20 */
+/***/ (function(module, exports) {
+
+	module.exports = fromScaling
+
+	/**
+	 * Creates a matrix from a vector scaling
+	 * This is equivalent to (but much faster than):
+	 *
+	 *     mat4.identity(dest)
+	 *     mat4.scale(dest, dest, vec)
+	 *
+	 * @param {mat4} out mat4 receiving operation result
+	 * @param {vec3} v Scaling vector
+	 * @returns {mat4} out
+	 */
+	function fromScaling(out, v) {
+	  out[0] = v[0]
+	  out[1] = 0
+	  out[2] = 0
+	  out[3] = 0
+	  out[4] = 0
+	  out[5] = v[1]
+	  out[6] = 0
+	  out[7] = 0
+	  out[8] = 0
+	  out[9] = 0
+	  out[10] = v[2]
+	  out[11] = 0
+	  out[12] = 0
+	  out[13] = 0
+	  out[14] = 0
+	  out[15] = 1
+	  return out
+	}
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports) {
+
+	module.exports = fromTranslation
+
+	/**
+	 * Creates a matrix from a vector translation
+	 * This is equivalent to (but much faster than):
+	 *
+	 *     mat4.identity(dest)
+	 *     mat4.translate(dest, dest, vec)
+	 *
+	 * @param {mat4} out mat4 receiving operation result
+	 * @param {vec3} v Translation vector
+	 * @returns {mat4} out
+	 */
+	function fromTranslation(out, v) {
+	  out[0] = 1
+	  out[1] = 0
+	  out[2] = 0
+	  out[3] = 0
+	  out[4] = 0
+	  out[5] = 1
+	  out[6] = 0
+	  out[7] = 0
+	  out[8] = 0
+	  out[9] = 0
+	  out[10] = 1
+	  out[11] = 0
+	  out[12] = v[0]
+	  out[13] = v[1]
+	  out[14] = v[2]
+	  out[15] = 1
+	  return out
+	}
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
+
+	module.exports = fromXRotation
+
+	/**
+	 * Creates a matrix from the given angle around the X axis
+	 * This is equivalent to (but much faster than):
+	 *
+	 *     mat4.identity(dest)
+	 *     mat4.rotateX(dest, dest, rad)
+	 *
+	 * @param {mat4} out mat4 receiving operation result
+	 * @param {Number} rad the angle to rotate the matrix by
+	 * @returns {mat4} out
+	 */
+	function fromXRotation(out, rad) {
+	    var s = Math.sin(rad),
+	        c = Math.cos(rad)
+
+	    // Perform axis-specific matrix multiplication
+	    out[0] = 1
+	    out[1] = 0
+	    out[2] = 0
+	    out[3] = 0
+	    out[4] = 0
+	    out[5] = c
+	    out[6] = s
+	    out[7] = 0
+	    out[8] = 0
+	    out[9] = -s
+	    out[10] = c
+	    out[11] = 0
+	    out[12] = 0
+	    out[13] = 0
+	    out[14] = 0
+	    out[15] = 1
+	    return out
+	}
+
+/***/ }),
 /* 23 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
+
+	module.exports = fromYRotation
+
+	/**
+	 * Creates a matrix from the given angle around the Y axis
+	 * This is equivalent to (but much faster than):
+	 *
+	 *     mat4.identity(dest)
+	 *     mat4.rotateY(dest, dest, rad)
+	 *
+	 * @param {mat4} out mat4 receiving operation result
+	 * @param {Number} rad the angle to rotate the matrix by
+	 * @returns {mat4} out
+	 */
+	function fromYRotation(out, rad) {
+	    var s = Math.sin(rad),
+	        c = Math.cos(rad)
+
+	    // Perform axis-specific matrix multiplication
+	    out[0] = c
+	    out[1] = 0
+	    out[2] = -s
+	    out[3] = 0
+	    out[4] = 0
+	    out[5] = 1
+	    out[6] = 0
+	    out[7] = 0
+	    out[8] = s
+	    out[9] = 0
+	    out[10] = c
+	    out[11] = 0
+	    out[12] = 0
+	    out[13] = 0
+	    out[14] = 0
+	    out[15] = 1
+	    return out
+	}
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports) {
+
+	module.exports = fromZRotation
+
+	/**
+	 * Creates a matrix from the given angle around the Z axis
+	 * This is equivalent to (but much faster than):
+	 *
+	 *     mat4.identity(dest)
+	 *     mat4.rotateZ(dest, dest, rad)
+	 *
+	 * @param {mat4} out mat4 receiving operation result
+	 * @param {Number} rad the angle to rotate the matrix by
+	 * @returns {mat4} out
+	 */
+	function fromZRotation(out, rad) {
+	    var s = Math.sin(rad),
+	        c = Math.cos(rad)
+
+	    // Perform axis-specific matrix multiplication
+	    out[0] = c
+	    out[1] = s
+	    out[2] = 0
+	    out[3] = 0
+	    out[4] = -s
+	    out[5] = c
+	    out[6] = 0
+	    out[7] = 0
+	    out[8] = 0
+	    out[9] = 0
+	    out[10] = 1
+	    out[11] = 0
+	    out[12] = 0
+	    out[13] = 0
+	    out[14] = 0
+	    out[15] = 1
+	    return out
+	}
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports) {
 
 	module.exports = fromQuat;
 
@@ -1108,9 +1217,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 26 */
+/***/ (function(module, exports) {
 
 	module.exports = frustum;
 
@@ -1149,9 +1258,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 27 */
+/***/ (function(module, exports) {
 
 	module.exports = perspective;
 
@@ -1187,9 +1296,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 28 */
+/***/ (function(module, exports) {
 
 	module.exports = perspectiveFromFieldOfView;
 
@@ -1233,9 +1342,9 @@
 
 
 
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 29 */
+/***/ (function(module, exports) {
 
 	module.exports = ortho;
 
@@ -1274,11 +1383,11 @@
 	    return out;
 	};
 
-/***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
 
-	var identity = __webpack_require__(10);
+	var identity = __webpack_require__(6);
 
 	module.exports = lookAt;
 
@@ -1369,9 +1478,9 @@
 	    return out;
 	};
 
-/***/ },
-/* 29 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 31 */
+/***/ (function(module, exports) {
 
 	module.exports = str;
 
@@ -1388,5 +1497,165 @@
 	                    a[12] + ', ' + a[13] + ', ' + a[14] + ', ' + a[15] + ')';
 	};
 
-/***/ }
-/******/ ])
+/***/ }),
+/* 32 */
+/***/ (function(module, exports) {
+
+	module.exports = createProgram;
+
+	function createProgram(gl, vertSrc, fragSrc, uniformNames, attributeNames) {
+	  var vert = compileShader(gl, gl.VERTEX_SHADER, vertSrc);
+	  var frag = compileShader(gl, gl.FRAGMENT_SHADER, fragSrc);
+
+	  var program = gl.createProgram();
+	  gl.attachShader(program, vert);
+	  gl.attachShader(program, frag);
+
+	  var attributes = {};
+	  attributeNames.forEach(function(name, location) {
+	    gl.bindAttribLocation(program, location, name);
+	    console.log('attribute location', name, location);
+	    attributes[name] = location;
+	  });
+
+	  gl.linkProgram(program);
+	  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+	    throw new Error('Error linking program: ' + gl.getProgramInfoLog(program));
+	  }
+
+	  var uniforms = {};
+	  uniformNames.forEach(function(name) {
+	    var location = gl.getUniformLocation(program, name);
+	    console.log('uniform location', name, location);
+	    uniforms[name] = location;
+	  });
+
+	  return {
+	    program: program,
+	    uniforms: uniforms,
+	    attributes: attributes
+	  };
+	}
+
+	function compileShader(gl, type, src) {
+	  var shader = gl.createShader(type);
+	  gl.shaderSource(shader, src);
+	  gl.compileShader(shader);
+	  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+	    throw new Error('Error compiling shader: ' + gl.getShaderInfoLog(shader));
+	  }
+	  return shader;
+	}
+
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports) {
+
+	var uniqueVertices = [
+	  -1, -1, -1,
+	  -1, -1, 1,
+	  -1, 1, -1,
+	  -1, 1, 1,
+	  1, -1, -1,
+	  1, -1, 1,
+	  1, 1, -1,
+	  1, 1, 1
+	];
+
+	var elements = [
+	  0, 1,
+	  1, 3,
+	  3, 2,
+	  2, 0,
+
+	  4, 5,
+	  5, 7,
+	  7, 6,
+	  6, 4,
+
+	  0, 4,
+	  1, 5,
+	  2, 6,
+	  3, 7
+	];
+
+	// Destruct elements into vertices.
+	module.exports = elements.reduce(function(acc, index) {
+	  acc.push(uniqueVertices[index * 3]);
+	  acc.push(uniqueVertices[index * 3 + 1]);
+	  acc.push(uniqueVertices[index * 3 + 2]);
+	  return acc;
+	}, []);
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports) {
+
+	module.exports = function(canvas) {
+	  window.addEventListener('resize', resize);
+	  resize();
+
+	  function resize() {
+	    canvas.width = window.innerWidth;
+	    canvas.height = window.innerHeight;
+	  }
+	};
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports) {
+
+	var SMOOTHING_RATIO = 0.7;
+
+	module.exports = function() {
+	  var analyser;
+	  navigator.mediaDevices.getUserMedia({ audio: true }).then(
+	    function(stream) {
+	      console.log("Got user media");
+	      var context = new AudioContext();
+	      analyser = context.createAnalyser();
+	      var microphone = context.createMediaStreamSource(stream);
+	      microphone.connect(analyser);
+	    },
+	    function(e) {
+	      console.error("Failed to get user media", e);
+	    }
+	  );
+
+	  var smoothed = 0;
+
+	  return function() {
+	    if (!analyser) {
+	      return null;
+	    }
+	    var fft = new Float32Array(analyser.frequencyBinCount);
+	    analyser.getFloatFrequencyData(fft);
+	    smoothed =
+	      smoothed * SMOOTHING_RATIO +
+	      getAverageVolume(fft) * (1.0 - SMOOTHING_RATIO);
+	    return smoothed;
+	  };
+	};
+
+	function getAverageVolume(fft) {
+	  var volume = 140 + average(fft);
+	  if (volume < 0) {
+	    return 0;
+	  }
+	  return volume;
+	}
+
+	function average(array) {
+	  var total = 0;
+	  for (var i = 0; i < array.length; i++) {
+	    total += array[i];
+	  }
+	  return total / array.length;
+	}
+
+
+/***/ })
+/******/ ]);
